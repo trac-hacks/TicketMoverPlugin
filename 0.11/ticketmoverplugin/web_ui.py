@@ -97,7 +97,7 @@ class TicketMoverHandler(Component):
         assert self.permission in req.perm
 
         tm = TicketMover(self.env)
-        tm.move(req.args['ticket'], req.authname, req.args['project'], 'delete' in req.args)
+        new_location = tm.move(req.args['ticket'], req.authname, req.args['project'], 'delete' in req.args)
 
         if 'delete' in req.args:
             req.redirect(new_location)

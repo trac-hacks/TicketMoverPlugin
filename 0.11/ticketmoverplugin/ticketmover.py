@@ -7,6 +7,7 @@ See:
 """
 
 import os
+import shutil
 
 from trac.config import ListOption
 from trac.config import Option
@@ -185,28 +186,35 @@ class TicketMover(Component):
         new_ticket.values = old_ticket.values.copy()
         new_ticket.insert(when=old_ticket.time_created)
 
-        # copy the changelog
-        for table, _id in [('ticket_change', 'ticket')]:
+        # copy the changelog and attachment DBs
+        for table, _id in tables.items():
             for row in get_all_dict(self.env, "SELECT * FROM %s WHERE %s=%s" % (table, _id, ticket_id)):
                 row[_id] = new_ticket.id
                 insert_row_from_dict(env, table, row)
 
-        # copy the attachments [TODO]
+        # copy the attachments
+        src_attachment_dir = os.path.join(self.env.path, 'attachments', 'ticket', str(ticket_id))
+        if os.path.exists(src_attachment_dir):
+            dest_attachment_dir = os.path.join(env.path, 'attachments', 'ticket')
+            if not os.path.exists(dest_attachment_dir):
+                os.makedirs(dest_attachment_dir)
+            dest_attachment_dir = os.path.join(dest_attachment_dir, str(new_ticket.id))
+            shutil.copytree(src_attachment_dir, dest_attachment_dir)
 
         # note the previous location on the new ticket
         new_ticket.save_changes(author, 'moved from %s' % self.env.abs_href('ticket', ticket_id))
 
         # location of new ticket
         new_location = env.abs_href('ticket', new_ticket.id)
+        
 
         if delete:
             old_ticket.delete()
-            raise NotImplementedError
         else:
             # close old ticket and point to new one
             old_ticket['status'] = u'closed'
             old_ticket['resolution'] = u'moved'
-            old_ticket.save_changes(author, 'moved to %s' % new_location)
+            old_ticket.save_changes(author, u'moved to %s' % new_location)
         
         # return the new location
         return new_location
