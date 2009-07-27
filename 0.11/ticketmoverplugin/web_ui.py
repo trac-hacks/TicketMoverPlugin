@@ -22,7 +22,7 @@ class TicketMoverSidebar(Component):
     ### methods for ITicketSidebarProvider
 
     def enabled(self, req, ticket):
-        if not self.permission in req.perm:
+        if not self.permission in req.perm or not ticket.exists:
             return False
         tm = TicketMover(self.env)
         projects = tm.projects(req.authname)
