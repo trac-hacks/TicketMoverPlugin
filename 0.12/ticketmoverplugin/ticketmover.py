@@ -116,7 +116,7 @@ class TicketMover(Component):
         controls.append(tag.select(
                 [tag.option(p) for p in self.projects()], name="project"))
         controls.append(tag.label("and Delete Ticket", tag.input(type="checkbox",name="delete")))
-        return ("Move To",controls, "Move to another trac. If not deleted this ticket will be closed with resolution 'deleted'")
+        return ("Move To",controls, "Move to another trac. If not deleted this ticket will be closed with resolution 'deleted'. WARNING: references to this ticket will not be updated.")
 
     ### internal methods
 
