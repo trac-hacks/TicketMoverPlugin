@@ -14,7 +14,7 @@ from trac.config import Option
 from trac.core import *
 from trac.env import open_environment
 from trac.env import IEnvironmentSetupParticipant
-from trac.perm import PermissionSystem
+from trac.perm import PermissionCache
 from trac.web.api import ITemplateStreamFilter
 from trac.ticket import Ticket
 from trac.ticket.api import ITicketActionController
@@ -25,8 +25,7 @@ class TicketMover(Component):
 
     implements(IEnvironmentSetupParticipant)
 
-    permission = Option('ticket', 'move_permission', 'TICKET_ADMIN',
-                        "permission needed to move tickets between Trac projects")
+    permission = 'TICKET_ADMIN'
 
     ### methods for IEnvironmentSetupParticipant
 
@@ -147,23 +146,13 @@ class TicketMover(Component):
 
     ### internal methods
 
-    def projects(self, user):
+    def projects(self):
+        self.env.log.debug("Building list of peer environments")
         base_path, _project = os.path.split(self.env.path)
-        _projects = [ i for i in os.listdir(base_path)
-                      if i != _project ]
-        projects = {}
-        for project in _projects:
-            path = os.path.join(base_path, project)
-            try:
-                env = open_environment(path)
-            except:
-                continue
-            perm = PermissionSystem(env)
-            if self.permission in perm.get_user_permissions(user):
-                projects[project] = env
+        return [i for i in os.listdir(base_path)
+                if i != _project
+                and os.path.exists(os.path.join(base_path, i,"conf","trac.ini"))]
 
-        return projects
-        
     def move(self, ticket_id, author, env, delete=False):
         """
         move a ticket to another environment
@@ -177,6 +166,7 @@ class TicketMover(Component):
         if isinstance(env, basestring):
             base_path, _project = os.path.split(self.env.path)
             env = open_environment(os.path.join(base_path, env))
+            PermissionCache(env,author).require('TICKET_CREATE')
 
         # get the old ticket
         old_ticket = Ticket(self.env, ticket_id)
@@ -206,7 +196,6 @@ class TicketMover(Component):
 
         # location of new ticket
         new_location = env.abs_href('ticket', new_ticket.id)
-        
 
         if delete:
             old_ticket.delete()
@@ -215,6 +204,6 @@ class TicketMover(Component):
             old_ticket['status'] = u'closed'
             old_ticket['resolution'] = u'moved'
             old_ticket.save_changes(author, u'moved to %s' % new_location)
-        
+
         # return the new location
         return new_location
