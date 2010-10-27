@@ -15,11 +15,9 @@ setup(name='TicketMoverPlugin',
       package_data={ 'ticketmoverplugin': ['templates/*', 'htdocs/*'] },
       zip_safe=False,
       install_requires=[
-        'TicketSidebarProvider',
         'TracSQLHelper'
         ],
       dependency_links=[
-        "http://trac-hacks.org/svn/ticketsidebarproviderplugin/0.11#egg=TicketSidebarProvider",
         "http://trac-hacks.org/svn/tracsqlhelperscript/anyrelease#egg=TracSQLHelper",
         ],
       entry_points = """
