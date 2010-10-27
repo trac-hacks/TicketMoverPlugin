@@ -8,6 +8,7 @@ See:
 
 import os
 import shutil
+import string
 
 from trac.config import ListOption
 from trac.config import Option
@@ -19,23 +20,10 @@ from trac.ticket import Ticket
 from trac.ticket.api import ITicketActionController
 from tracsqlhelper import get_all_dict
 from tracsqlhelper import insert_row_from_dict
+from genshi.builder import tag
 
 class TicketMover(Component):
-    ### methods for ITemplateStreamFilter
-
-    """Filter a Genshi event stream prior to rendering."""
-
-    def filter_stream(self, req, method, filename, stream, data):
-        """Return a filtered Genshi event stream, or the original unfiltered
-        stream if no match.
-
-        `req` is the current request object, `method` is the Genshi render
-        method (xml, xhtml or text), `filename` is the filename of the template
-        to be rendered, `stream` is the event stream and `data` is the data for
-        the current template.
-
-        See the Genshi documentation for more information.
-        """
+    implements(ITicketActionController)
 
     ### methods for ITicketActionController
 
@@ -56,6 +44,10 @@ class TicketMover(Component):
         This method will only be called if the controller claimed to handle
         the given `action` in the call to `get_ticket_actions`.
         """
+        delete = 'delete' in req.args
+        new_location = self.move(ticket.id, req.authname, req.args['project'], delete)
+        if delete:
+            req.redirect(new_location)
 
     def get_all_status(self):
         """Returns an iterable of all the possible values for the ''status''
@@ -65,6 +57,7 @@ class TicketMover(Component):
         It is assumed that the initial status of a ticket is 'new' and
         the terminal status of a ticket is 'closed'.
         """
+        return []
 
     def get_ticket_actions(self, req, ticket):
         """Return an iterable of `(weight, action)` tuples corresponding to
@@ -75,12 +68,17 @@ class TicketMover(Component):
         `action` is a key used to identify that particular action.
         (note that 'history' and 'diff' are reserved and should not be used
         by plugins)
-        
+
         The actions will be presented on the page in descending order of the
         integer weight. The first action in the list is used as the default
         action.
 
         When in doubt, use a weight of 0."""
+        self.env.log.debug("Adding move action.")
+        if req.perm.has_permission("TICKET_ADMIN") :
+            return [(0,"move")]
+        else :
+            return []
 
     def get_ticket_changes(self, req, ticket, action):
         """Return a dictionary of ticket field changes.
@@ -95,6 +93,9 @@ class TicketMover(Component):
         This method will only be called if the controller claimed to handle
         the given `action` in the call to `get_ticket_actions`.
         """
+        return {'status':'closed',
+                'resolution':'moved'
+                }
 
     def render_ticket_action_control(self, req, ticket, action):
         """Return a tuple in the form of `(label, control, hint)`
@@ -111,15 +112,21 @@ class TicketMover(Component):
         unique.  The method used in the default ITicketActionController is to
         use `"action_%s_something" % action`.
         """
+        controls = []
+        controls.append(tag.select(
+                [tag.option(p) for p in self.projects()], name="project"))
+        controls.append(tag.label("and Delete Ticket", tag.input(type="checkbox",name="delete")))
+        return ("Move To",controls, "Move to another trac. If not deleted this ticket will be closed with resolution 'deleted'")
 
     ### internal methods
 
     def projects(self):
         self.env.log.debug("Building list of peer environments")
         base_path, _project = os.path.split(self.env.path)
-        return [i for i in os.listdir(base_path)
-                if i != _project
-                and os.path.exists(os.path.join(base_path, i,"conf","trac.ini"))]
+        return sorted([i for i in os.listdir(base_path)
+                       if i != _project
+                       and os.path.exists(os.path.join(base_path, i,"conf","trac.ini"))],
+                      key=string.lower)
 
     def move(self, ticket_id, author, env, delete=False):
         """
