@@ -13,7 +13,6 @@ from trac.config import ListOption
 from trac.config import Option
 from trac.core import *
 from trac.env import open_environment
-from trac.env import IEnvironmentSetupParticipant
 from trac.perm import PermissionCache
 from trac.web.api import ITemplateStreamFilter
 from trac.ticket import Ticket
@@ -22,37 +21,6 @@ from tracsqlhelper import get_all_dict
 from tracsqlhelper import insert_row_from_dict
 
 class TicketMover(Component):
-
-    implements(IEnvironmentSetupParticipant)
-
-    permission = 'TICKET_ADMIN'
-
-    ### methods for IEnvironmentSetupParticipant
-
-    """Extension point interface for components that need to participate in the
-    creation and upgrading of Trac environments, for example to create
-    additional database tables."""
-
-    def environment_created(self):
-        """Called when a new Trac environment is created."""
-
-
-    def environment_needs_upgrade(self, db):
-        """Called when Trac checks whether the environment needs to be upgraded.
-        
-        Should return `True` if this participant needs an upgrade to be
-        performed, `False` otherwise.
-        """
-        return False
-
-    def upgrade_environment(self, db):
-        """Actually perform an environment upgrade.
-        
-        Implementations of this method should not commit any database
-        transactions. This is done implicitly after all participants have
-        performed the upgrades they need without an error being raised.
-        """
-
     ### methods for ITemplateStreamFilter
 
     """Filter a Genshi event stream prior to rendering."""
