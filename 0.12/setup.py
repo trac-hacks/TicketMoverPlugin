@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version='0.1.1'
+version='0.2'
 
 setup(name='TicketMoverPlugin',
       version=version,
@@ -26,4 +26,3 @@ setup(name='TicketMoverPlugin',
       ticketmoverweb = ticketmoverplugin.web_ui
       """,
       )
-
