@@ -25,6 +25,11 @@ from genshi.builder import tag
 class TicketMover(Component):
     implements(ITicketActionController)
 
+
+    def field_name(self,action,field):
+        return "action_%s_%s" % (action,field)
+
+
     ### methods for ITicketActionController
 
     """Extension point interface for components willing to participate
@@ -44,8 +49,9 @@ class TicketMover(Component):
         This method will only be called if the controller claimed to handle
         the given `action` in the call to `get_ticket_actions`.
         """
-        delete = 'delete' in req.args
-        new_location = self.move(ticket.id, req.authname, req.args['project'], delete)
+        delete = self.field_name(action,'delete') in req.args
+        project = req.args.get(self.field_name(action,'project'))
+        new_location = self.move(ticket.id, req.authname, project, delete)
         if delete:
             req.redirect(new_location)
 
@@ -112,11 +118,20 @@ class TicketMover(Component):
         unique.  The method used in the default ITicketActionController is to
         use `"action_%s_something" % action`.
         """
+        project_field_name = self.field_name(action, 'project')
+        delete_field_name = self.field_name(action,'delete')
+        selected_project = req.args.get(project_field_name)
         controls = []
         controls.append(tag.select(
-                [tag.option(p) for p in self.projects()], name="project"))
-        controls.append(tag.label("and Delete Ticket", tag.input(type="checkbox",name="delete")))
-        return ("Move To",controls, "Move to another trac. If not deleted this ticket will be closed with resolution 'duplicate'. WARNING: references to this ticket will not be updated.")
+                [tag.option(p, selected=(p == selected_project or None))
+                 for p in self.projects()], name=project_field_name))
+        controls.append(tag.label("and Delete Ticket",
+                                  tag.input(type="checkbox",
+                                            name=delete_field_name,
+                                            checked=req.args.get(delete_field_name))))
+        return ("Move To",controls, """Move to another trac. If not deleted
+this ticket will be closed with resolution 'duplicate'. WARNING: references
+to this ticket will not be updated.""")
 
     ### internal methods
 
@@ -131,7 +146,7 @@ class TicketMover(Component):
     def move(self, ticket_id, author, env, delete=False):
         """
         move a ticket to another environment
-        
+
         env: environment to move to
         """
         tables = { 'attachment': 'id',
@@ -167,7 +182,10 @@ class TicketMover(Component):
             shutil.copytree(src_attachment_dir, dest_attachment_dir)
 
         # note the previous location on the new ticket
-        new_ticket.save_changes(author, 'moved from %s' % self.env.abs_href('ticket', ticket_id))
+        if delete :
+            new_ticket.save_changes(author, 'moved from %s (ticket deleted)' % self.env.abs_href())
+        else :
+            new_ticket.save_changes(author, 'moved from %s' % self.env.abs_href('ticket', ticket_id))
 
         # location of new ticket
         new_location = env.abs_href('ticket', new_ticket.id)
