@@ -94,7 +94,7 @@ class TicketMover(Component):
         the given `action` in the call to `get_ticket_actions`.
         """
         return {'status':'closed',
-                'resolution':'moved'
+                'resolution':'duplicate'
                 }
 
     def render_ticket_action_control(self, req, ticket, action):
@@ -116,7 +116,7 @@ class TicketMover(Component):
         controls.append(tag.select(
                 [tag.option(p) for p in self.projects()], name="project"))
         controls.append(tag.label("and Delete Ticket", tag.input(type="checkbox",name="delete")))
-        return ("Move To",controls, "Move to another trac. If not deleted this ticket will be closed with resolution 'deleted'. WARNING: references to this ticket will not be updated.")
+        return ("Move To",controls, "Move to another trac. If not deleted this ticket will be closed with resolution 'duplicate'. WARNING: references to this ticket will not be updated.")
 
     ### internal methods
 
@@ -177,7 +177,7 @@ class TicketMover(Component):
         else:
             # close old ticket and point to new one
             old_ticket['status'] = u'closed'
-            old_ticket['resolution'] = u'moved'
+            old_ticket['resolution'] = u'duplicate'
             old_ticket.save_changes(author, u'moved to %s' % new_location)
 
         # return the new location
