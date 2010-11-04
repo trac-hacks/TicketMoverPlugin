@@ -99,9 +99,7 @@ class TicketMover(Component):
         This method will only be called if the controller claimed to handle
         the given `action` in the call to `get_ticket_actions`.
         """
-        return {'status':'closed',
-                'resolution':'duplicate'
-                }
+        return {}
 
     def render_ticket_action_control(self, req, ticket, action):
         """Return a tuple in the form of `(label, control, hint)`
