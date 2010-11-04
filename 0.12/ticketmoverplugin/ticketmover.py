@@ -154,8 +154,11 @@ to this ticket will not be updated.""")
 
         env: environment to move to
         """
+        self.env.log.info("Starting move of ticket %d to environment %r. delete: %r",
+                          ticket_id,env,delete)
+
         tables = { 'attachment': 'id',
-                   'ticket_change': 'ticket', }
+                   'ticket_change': 'ticket'}
 
         # open the environment if it is a string
         if isinstance(env, basestring):
