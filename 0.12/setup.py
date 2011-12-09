@@ -23,6 +23,5 @@ setup(name='TicketMoverPlugin',
       entry_points = """
       [trac.plugins]
       ticketmoverplugin = ticketmoverplugin.ticketmover
-      ticketmoverweb = ticketmoverplugin.web_ui
       """,
       )
