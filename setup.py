@@ -12,15 +12,15 @@ setup(name='TicketMoverPlugin',
       license="",
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests*']),
       include_package_data=True,
-      package_data={ 'ticketmoverplugin': ['templates/*', 'htdocs/*'] },
+      package_data={'ticketmoverplugin': ['templates/*', 'htdocs/*']},
       zip_safe=False,
       install_requires=[
-        'TracSQLHelper'
-        ],
+          'TracSQLHelper'
+      ],
       dependency_links=[
-        "http://trac-hacks.org/svn/tracsqlhelperscript/anyrelease#egg=TracSQLHelper",
-        ],
-      entry_points = """
+          "http://trac-hacks.org/svn/tracsqlhelperscript/anyrelease#egg=TracSQLHelper",
+      ],
+      entry_points="""
       [trac.plugins]
       ticketmoverplugin = ticketmoverplugin.ticketmover
       """,
