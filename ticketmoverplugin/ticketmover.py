@@ -163,7 +163,7 @@ to this ticket will not be updated.""")
         # open the environment if it is a string
         if isinstance(env, basestring):
             base_path, _project = os.path.split(self.env.path)
-            env = open_environment(os.path.join(base_path, env))
+            env = open_environment(os.path.join(base_path, env), use_cache=True)
             PermissionCache(env,author).require('TICKET_CREATE')
 
         # get the old ticket
