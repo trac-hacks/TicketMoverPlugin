@@ -69,7 +69,7 @@ class TicketMover(Component):
         action.
 
         When in doubt, use a weight of 0."""
-        self.env.log.debug("Adding move action.")
+        self.log.debug("Adding move action.")
         if req.perm.has_permission("TICKET_ADMIN") and len(self.projects()) > 0:
             return [(0, "move")]
         else:
@@ -127,14 +127,14 @@ to this ticket will not be updated.""")
         """Build the list of peer environments based upon directories
         that contain a conf/trac.ini file"""
         if self._projects is None:
-            self.env.log.debug("Building list of peer environments")
+            self.log.debug("Building list of peer environments")
             base_path, _project = os.path.split(self.env.path)
             p = [i for i in os.listdir(base_path)
                  if (i != _project
                      and os.path.exists(os.path.join(base_path, i, "conf/trac.ini")))]
             self._projects = sorted(p, key=string.lower)
         else:
-            self.env.log.debug("Using cached list of peer environments.")
+            self.log.debug("Using cached list of peer environments.")
         return self._projects
 
     def move(self, ticket_id, author, env, delete=False):
@@ -143,8 +143,8 @@ to this ticket will not be updated.""")
 
         env: environment to move to
         """
-        self.env.log.info("Starting move of ticket %d to environment %r. delete: %r",
-                          ticket_id, env, delete)
+        self.log.info("Starting move of ticket %d to environment %r. delete: %r",
+                      ticket_id, env, delete)
 
         tables = {'attachment': 'id',
                   'ticket_change': 'ticket'}
