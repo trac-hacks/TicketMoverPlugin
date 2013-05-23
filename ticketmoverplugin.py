@@ -1,9 +1,7 @@
 """
 TicketMoverPlugin:
 a plugin for Trac to move tickets from one Trac instance to another
-See:
- * http://trac-hacks.org/wiki/DataMoverPlugin
- * http://trac.edgewall.org
+See: https://github.com/UnwashedMeme/TicketMoverPlugin
 """
 import os
 import shutil
@@ -24,14 +22,12 @@ class TicketMover(Component):
     def field_name(self, action, field):
         return "action_%s_%s" % (action, field)
 
-
     ### methods for ITicketActionController
     ## Extension point interface for components willing to participate
     ## in the ticket workflow.
     ##
     ## This is mainly about controlling the changes to the ticket ''status'',
     ## though not restricted to it.
-
     def apply_action_side_effects(self, req, ticket, action):
         """Perform side effects once all changes have been made to the ticket.
 

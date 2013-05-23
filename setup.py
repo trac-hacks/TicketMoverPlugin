@@ -1,27 +1,28 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
-version='0.2.2'
+version='0.3'
+
+#this plugin was originally by Jeff Hammel <jhammel@openplans.org>
+#but I've substantially altered and mainted it for a while now.
 
 setup(name='TicketMoverPlugin',
       version=version,
       description="move tickets from one Trac to a sibling Trac",
-      author='Jeff Hammel',
-      author_email='jhammel@openplans.org',
-      url='http://trac-hacks.org/wiki/k0s',
+      author='Nathan Bird',
+      author_email='nathan@acceleration.net',
+      url='https://github.com/UnwashedMeme/TicketMoverPlugin',
       keywords='trac plugin',
-      license="",
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests*']),
-      include_package_data=True,
-      package_data={'ticketmoverplugin': ['templates/*', 'htdocs/*']},
-      zip_safe=False,
+      license="BSD",
+      py_modules=['ticketmoverplugin'],
       install_requires=[
           'TracSQLHelper'
       ],
       dependency_links=[
-          "http://trac-hacks.org/svn/tracsqlhelperscript/anyrelease#egg=TracSQLHelper",
+          "svn+http://trac-hacks.org/svn/tracsqlhelperscript/0.12/#egg=TracSQLHelper-0.2.2",
       ],
-      entry_points="""
-      [trac.plugins]
-      ticketmoverplugin = ticketmoverplugin.ticketmover
-      """,
-      )
+      entry_points={
+          'trac.plugins': [
+              'ticketmoverplugin=ticketmoverplugin'
+          ]
+      },
+)
