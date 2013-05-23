@@ -8,7 +8,7 @@ import shutil
 import string
 
 from genshi.builder import tag
-from trac.core import Component, implements
+from trac.core import Component, TracError, implements
 from trac.env import open_environment
 from trac.perm import PermissionCache
 from trac.ticket import Ticket
@@ -42,7 +42,12 @@ class TicketMover(Component):
         project = req.args.get(self.field_name(action, 'project'))
         new_location = self.move(ticket.id, req.authname, project, delete)
         if delete:
-            req.redirect(new_location)
+            if new_location:
+                req.redirect(new_location)
+            else:
+                raise TracError("Can't redirect to project {0} "
+                                "after moving ticket because \"base_url\" "
+                                "is not set for that project. ".format(project))
 
     def get_all_status(self):
         """Returns an iterable of all the possible values for the ''status''
@@ -186,16 +191,18 @@ to this ticket will not be updated.""")
         else:
             new_ticket.save_changes(author, 'moved from %s' % self.env.abs_href('ticket', ticket_id))
 
-        # location of new ticket
-        new_location = env.abs_href('ticket', new_ticket.id)
-
         if delete:
             old_ticket.delete()
+            if env.base_url:
+                return env.abs_href('ticket', new_ticket.id)
         else:
+            # location of new ticket
+            if env.base_url:
+                target_name = env.abs_href('ticket', new_ticket.id)
+            else:
+                target_name = "{0}:#{1}".format(env.project_name, new_ticket.id)
+
             # close old ticket and point to new one
             old_ticket['status'] = u'closed'
             old_ticket['resolution'] = u'duplicate'
-            old_ticket.save_changes(author, u'moved to %s' % new_location)
-
-        # return the new location
-        return new_location
+            old_ticket.save_changes(author, u'moved to %s' % target_name)
