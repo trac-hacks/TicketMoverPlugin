@@ -19,8 +19,15 @@ Installation
 1. python install the plugin.
 2. Ensure the component is active either through the web admin or by
    adding to trac.ini
-	[components]
-	ticketmoverplugin.ticketmover = enabled
+```ini
+    [components]
+    ticketmoverplugin.ticketmover = enabled
+```    
+
 3. In trac.ini enable this as a workflow provider. Under the
    `[ticket]` section add `TicketMover` to the `workflow` list (comma
-   delimitted).
+   delimitted). e.g.
+```ini
+    [ticket]
+    workflow = ConfigurableTicketWorkflow,TicketMover
+```
