@@ -165,7 +165,9 @@ to this ticket will not be updated.""")
 
         # copy the changelog and attachment DBs
         for table, _id in tables.items():
-            for row in get_all_dict(self.env, "SELECT * FROM %s WHERE %s = '%s'" % (table, _id, ticket_id)):
+            for row in get_all_dict(self.env,
+                                    "SELECT * FROM %s WHERE %s = %%s" % (table, _id),
+                                    ticket_id):
                 row[_id] = new_ticket.id
                 insert_row_from_dict(env, table, row)
 
