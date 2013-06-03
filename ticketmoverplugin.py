@@ -172,7 +172,7 @@ to this ticket will not be updated.""")
         for table, _id in tables.items():
             for row in get_all_dict(self.env,
                                     "SELECT * FROM %s WHERE %s = %%s" % (table, _id),
-                                    ticket_id):
+                                    str(ticket_id)):
                 row[_id] = new_ticket.id
                 insert_row_from_dict(env, table, row)
 
