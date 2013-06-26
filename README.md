@@ -26,6 +26,8 @@ This plugin requires
 [TracSqlHelperScript](http://trac-hacks.org/wiki/TracSqlHelperScript),
 though installing with pip handles this automatically.
 
+It is known to work with Trac 1.0 though I believe it will work with Trac 0.12 as well.
+
 Installation
 ------------
 
