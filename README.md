@@ -17,6 +17,8 @@ The DROPDOWNLIST is populated with all trac environments that are
 siblings to the current one. Permissions are checked on the target
 trac when you actually attempt to move a ticket to there.
 
+![A screenshot showing what it looks like](Screenshot.png)
+
 Requirements
 ------------
 
