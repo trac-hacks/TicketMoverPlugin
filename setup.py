@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version = '0.4.1'
+version = '0.4.2'
 
 #this plugin was originally by Jeff Hammel <jhammel@openplans.org>
 #but I've substantially altered and mainted it for a while now.

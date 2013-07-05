@@ -73,8 +73,8 @@ class TicketMover(Component):
         integer weight. The first action in the list is used as the default
         action.
 
-        When in doubt, use a weight of 0."""
-        self.log.debug("Adding move action.")
+        When in doubt, use a weight of 0.
+        """
         if req.perm.has_permission("TICKET_ADMIN") and len(self.projects()) > 0:
             return [(0, "move")]
         else:
@@ -138,8 +138,6 @@ to this ticket will not be updated.""")
                  if (i != _project
                      and os.path.exists(os.path.join(base_path, i, "conf/trac.ini")))]
             self._projects = sorted(p, key=string.lower)
-        else:
-            self.log.debug("Using cached list of peer environments.")
         return self._projects
 
     def move(self, ticket_id, author, env, delete=False):
@@ -167,7 +165,7 @@ to this ticket will not be updated.""")
         new_ticket = Ticket(env)
         new_ticket.values = old_ticket.values.copy()
         new_ticket.insert(when=old_ticket.time_created)
-        self.log.debug("Ticket inserted into target environment as id %r",
+        self.log.debug("Ticket inserted into target environment as id %s",
                        new_ticket.id)
 
         # copy the changelog and attachment DBs
@@ -208,7 +206,7 @@ to this ticket will not be updated.""")
             if env.base_url:
                 return env.abs_href('ticket', new_ticket.id)
         else:
-            self.log.debug("Marking old ticket as done.")
+            self.log.debug("Marking old ticket as duplicate.")
             # location of new ticket
             if env.base_url:
                 target_name = env.abs_href('ticket', new_ticket.id)
