@@ -167,6 +167,8 @@ to this ticket will not be updated.""")
         new_ticket = Ticket(env)
         new_ticket.values = old_ticket.values.copy()
         new_ticket.insert(when=old_ticket.time_created)
+        self.log.debug("Ticket inserted into target environment as id %r",
+                       new_ticket.id)
 
         # copy the changelog and attachment DBs
         for table, _id in tables.items():
@@ -175,27 +177,38 @@ to this ticket will not be updated.""")
                                     str(ticket_id)):
                 row[_id] = new_ticket.id
                 insert_row_from_dict(env, table, row)
+            self.log.debug("Finished copying data from %r table", table)
 
         # copy the attachments
-        src_attachment_dir = os.path.join(self.env.path, 'attachments', 'ticket', str(ticket_id))
+        src_attachment_dir = os.path.join(
+            self.env.path, 'attachments', 'ticket', str(ticket_id))
         if os.path.exists(src_attachment_dir):
-            dest_attachment_dir = os.path.join(env.path, 'attachments', 'ticket')
+            self.log.debug("Copying attachements from %r", src_attachment_dir)
+            dest_attachment_dir = os.path.join(
+                env.path, 'attachments', 'ticket')
             if not os.path.exists(dest_attachment_dir):
                 os.makedirs(dest_attachment_dir)
-            dest_attachment_dir = os.path.join(dest_attachment_dir, str(new_ticket.id))
+            dest_attachment_dir = os.path.join(
+                dest_attachment_dir, str(new_ticket.id))
             shutil.copytree(src_attachment_dir, dest_attachment_dir)
 
         # note the previous location on the new ticket
         if delete:
-            new_ticket.save_changes(author, 'moved from %s (ticket deleted)' % self.env.abs_href())
+            new_ticket.save_changes(
+                author, 'moved from %s (ticket deleted)' % self.env.abs_href())
         else:
-            new_ticket.save_changes(author, 'moved from %s' % self.env.abs_href('ticket', ticket_id))
+            new_ticket.save_changes(
+                author, 'moved from %s' % self.env.abs_href('ticket', ticket_id))
+        self.log.info("Finished making new ticket @ %r",
+                      env.abs_href('ticket', ticket_id))
 
         if delete:
+            self.log.debug("Deleting old ticket")
             old_ticket.delete()
             if env.base_url:
                 return env.abs_href('ticket', new_ticket.id)
         else:
+            self.log.debug("Marking old ticket as done.")
             # location of new ticket
             if env.base_url:
                 target_name = env.abs_href('ticket', new_ticket.id)
